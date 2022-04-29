@@ -22,5 +22,7 @@ describe("Sign-up", () => {
     cy.wait("@signUp");
 
     cy.contains("Cadastro efetuado com sucesso!");
+
+    cy.url().should("equal", "http://localhost:3000/login");
   });
 });
