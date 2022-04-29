@@ -28,15 +28,28 @@ function Instructors() {
   >([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
-  useEffect(() => {
-    async function loadPage() {
-      if (!token) return;
+  async function handleSearch({ target }: React.ChangeEvent<HTMLInputElement>) {
+    if (!token) return;
 
-      const { data: testsData } = await api.getTestsByTeacher(token);
-      setTeachersDisciplines(testsData.tests);
-      const { data: categoriesData } = await api.getCategories(token);
-      setCategories(categoriesData.categories);
-    }
+    if (target.value.length === 0) return loadPage();
+
+    const { data: testsData } = await api.getTestsByTeacher({
+      token,
+      teacherName: target.value
+    });
+    setTeachersDisciplines(testsData.tests);
+  }
+
+  async function loadPage() {
+    if (!token) return;
+
+    const { data: testsData } = await api.getTestsByTeacher({ token });
+    setTeachersDisciplines(testsData.tests);
+    const { data: categoriesData } = await api.getCategories({ token });
+    setCategories(categoriesData.categories);
+  }
+
+  useEffect(() => {
     loadPage();
   }, [token]);
 
@@ -45,6 +58,7 @@ function Instructors() {
       <TextField
         sx={{ marginX: "auto", marginBottom: "25px", width: "450px" }}
         label="Pesquise por pessoa instrutora"
+        onChange={handleSearch}
       />
       <Divider sx={{ marginBottom: "35px" }} />
       <Box

@@ -9,11 +9,21 @@ interface UserData {
   password: string;
 }
 
-function getConfig(token: string) {
+interface configParams {
+  token: string;
+  params?: {
+    groupBy: string;
+    disciplineName?: string;
+    teacherName?: string;
+  };
+}
+
+function getConfig({ token, params }: configParams) {
   return {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+    params,
   };
 }
 
@@ -71,24 +81,36 @@ export type TestByTeacher = TeacherDisciplines & {
   tests: Test[];
 };
 
-async function getTestsByDiscipline(token: string) {
-  const config = getConfig(token);
-  return baseAPI.get<{ tests: TestByDiscipline[] }>(
-    "/tests?groupBy=disciplines",
-    config
-  );
+interface requestParams {
+  token: string;
+  disciplineName?: string;
+  teacherName?: string;
 }
 
-async function getTestsByTeacher(token: string) {
-  const config = getConfig(token);
-  return baseAPI.get<{ tests: TestByTeacher[] }>(
-    "/tests?groupBy=teachers",
-    config
-  );
+async function getTestsByDiscipline({ token, disciplineName }: requestParams) {
+  const params = {
+    groupBy: "disciplines",
+    disciplineName,
+  };
+
+  const config = getConfig({ token, params });
+  return baseAPI.get<{ tests: TestByDiscipline[] }>("/tests", config);
 }
 
-async function getCategories(token: string) {
-  const config = getConfig(token);
+async function getTestsByTeacher({ token, teacherName }: requestParams) {
+  const params = {
+    groupBy: "teachers",
+    teacherName,
+  };
+
+  const config = getConfig({ token, params });
+  return baseAPI.get<{ tests: TestByTeacher[] }>("/tests", config);
+}
+
+async function getCategories({ token }: requestParams) {
+  const config = {headers: {
+    Authorization: `Bearer ${token}`,
+  }};
   return baseAPI.get<{ categories: Category[] }>("/categories", config);
 }
 
