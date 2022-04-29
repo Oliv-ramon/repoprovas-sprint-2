@@ -10,9 +10,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { createContext, ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import useReload from "../hooks/useReload";
 import api, {
   Category,
   Discipline,
@@ -21,35 +22,33 @@ import api, {
   TestByDiscipline,
 } from "../services/api";
 
+interface ReloadContext {
+  reloadPage: () => void;
+}
+
 function Disciplines() {
   const navigate = useNavigate();
   const { token } = useAuth();
   const [terms, setTerms] = useState<TestByDiscipline[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const { loadPage } = useReload();
 
   async function handleSearch({ target }: React.ChangeEvent<HTMLInputElement>) {
     if (!token) return;
 
-    if (target.value.length === 0) return loadPage();
+    if (target.value.length === 0) {
+      return loadPage({ setTerms, setCategories });
+    }
 
     const { data: testsData } = await api.getTestsByDiscipline({
       token,
       disciplineName: target.value
     });
     setTerms(testsData.tests);
-  }
-
-  async function loadPage() {
-    if (!token) return;
-
-    const { data: testsData } = await api.getTestsByDiscipline({ token });
-    setTerms(testsData.tests);
-    const { data: categoriesData } = await api.getCategories({ token });
-    setCategories(categoriesData.categories);
-  }
+  };
 
   useEffect(() => {
-    loadPage();
+    loadPage({ setTerms, setCategories });
   }, [token]);
 
   return (
@@ -219,6 +218,10 @@ interface TestsProps {
   testsWithTeachers: { tests: Test[]; teacherName: string }[];
   categoryId: number;
 }
+
+async function handleTestClick(
+  { target }: React.ChangeEvent<HTMLButtonElement>
+) {} 
 
 function Tests({
   categoryId,

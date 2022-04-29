@@ -13,6 +13,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import useReload from "../hooks/useReload";
 import api, {
   Category,
   TeacherDisciplines,
@@ -27,30 +28,25 @@ function Instructors() {
     TestByTeacher[]
   >([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const { loadPage } = useReload();
+
 
   async function handleSearch({ target }: React.ChangeEvent<HTMLInputElement>) {
     if (!token) return;
 
-    if (target.value.length === 0) return loadPage();
+    if (target.value.length === 0) {
+      return loadPage({ setTeachersDisciplines, setCategories });
+    }
 
     const { data: testsData } = await api.getTestsByTeacher({
       token,
       teacherName: target.value
     });
     setTeachersDisciplines(testsData.tests);
-  }
-
-  async function loadPage() {
-    if (!token) return;
-
-    const { data: testsData } = await api.getTestsByTeacher({ token });
-    setTeachersDisciplines(testsData.tests);
-    const { data: categoriesData } = await api.getCategories({ token });
-    setCategories(categoriesData.categories);
-  }
+  };
 
   useEffect(() => {
-    loadPage();
+    loadPage({ setTeachersDisciplines, setCategories });
   }, [token]);
 
   return (
