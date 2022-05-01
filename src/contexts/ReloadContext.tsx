@@ -28,8 +28,7 @@ export default function ReloadProvider({ children }: Props) {
     setTerms,
     setTeachersDisciplines,
     setCategories,
-  }: LoadPageParams
-  ) {
+  }: LoadPageParams) {
     if (!token) return;
 
     if (setTerms) {

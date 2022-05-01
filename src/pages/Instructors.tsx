@@ -10,8 +10,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useAlert from "../hooks/useAlert";
 import useAuth from "../hooks/useAuth";
 import useReload from "../hooks/useReload";
 import api, {
@@ -20,6 +22,8 @@ import api, {
   Test,
   TestByTeacher,
 } from "../services/api";
+
+const InstructorsSetsContext = createContext<any>(null);
 
 function Instructors() {
   const navigate = useNavigate();
@@ -50,7 +54,9 @@ function Instructors() {
   }, [token]);
 
   return (
-    <>
+    <InstructorsSetsContext.Provider 
+      value={{ setTeachersDisciplines, setCategories }}
+    >
       <TextField
         sx={{ marginX: "auto", marginBottom: "25px", width: "450px" }}
         label="Pesquise por pessoa instrutora"
@@ -92,7 +98,7 @@ function Instructors() {
           teachersDisciplines={teachersDisciplines}
         />
       </Box>
-    </>
+    </InstructorsSetsContext.Provider>
   );
 }
 
@@ -202,16 +208,59 @@ interface TestsProps {
 }
 
 function Tests({ tests, disciplineName }: TestsProps) {
+  const { token } = useAuth();
+  const { loadPage } = useReload();
+  const { setMessage } = useAlert();
+  const navigate = useNavigate();
+  const { 
+    setTeachersDisciplines,
+    setCategories, 
+  } = useContext(InstructorsSetsContext);
+
+  async function handleTestClick(testId: number) {
+    if (!token) return;
+    
+    try {
+      await api.updateTestViews({ token, testId: testId });
+      loadPage({ setTeachersDisciplines, setCategories });
+    } catch (error) {
+      setMessage({ type: "error", text: "Por favor, tente logar novamente!" });
+      setTimeout(() => navigate("/login"), 2000);
+    }
+  }
+
   return (
     <>
       {tests.map((test) => (
-        <Typography key={test.id} color="#878787">
+        <Typography 
+          key={test.id} 
+          color="#878787" 
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}>
           <Link
             href={test.pdfUrl}
             target="_blank"
             underline="none"
             color="inherit"
-          >{`${test.name} (${disciplineName})`}</Link>
+            onClick={() => handleTestClick(test.id as number)}
+          >
+            {`${test.name} (${disciplineName})`}
+          </Link>
+          <Box
+            component="span"
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "5px"
+            }} 
+          >
+            <VisibilityIcon fontSize="small"/>  
+            {test.views}
+          </Box>
         </Typography>
       ))}
     </>

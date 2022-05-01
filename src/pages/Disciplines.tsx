@@ -10,8 +10,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { createContext, ReactNode, useEffect, useState } from "react";
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useAlert from "../hooks/useAlert";
 import useAuth from "../hooks/useAuth";
 import useReload from "../hooks/useReload";
 import api, {
@@ -22,9 +24,7 @@ import api, {
   TestByDiscipline,
 } from "../services/api";
 
-interface ReloadContext {
-  reloadPage: () => void;
-}
+const DisciplinesSetsContext = createContext<any>(null);
 
 function Disciplines() {
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ function Disciplines() {
   }, [token]);
 
   return (
-    <>
+    <DisciplinesSetsContext.Provider value={{ setTerms, setCategories }}>
       <TextField
         sx={{ marginX: "auto", marginBottom: "25px", width: "450px" }}
         label="Pesquise por disciplina"
@@ -91,7 +91,7 @@ function Disciplines() {
         </Box>
         <TermsAccordions categories={categories} terms={terms} />
       </Box>
-    </>
+    </DisciplinesSetsContext.Provider>
   );
 }
 
@@ -218,28 +218,63 @@ interface TestsProps {
   testsWithTeachers: { tests: Test[]; teacherName: string }[];
   categoryId: number;
 }
-
-async function handleTestClick(
-  { target }: React.ChangeEvent<HTMLButtonElement>
-) {} 
-
+ 
 function Tests({
   categoryId,
   testsWithTeachers: testsWithDisciplines,
 }: TestsProps) {
+  const { token } = useAuth();
+  const { loadPage } = useReload();
+  const { setTerms, setCategories } = useContext(DisciplinesSetsContext);
+  const { setMessage } = useAlert();
+  const navigate = useNavigate();
+
+  async function handleTestClick(testId: number) {
+    if (!token) return;
+    
+    try {
+      await api.updateTestViews({ token, testId: testId });
+      loadPage({ setTerms, setCategories });
+    } catch (error) {
+      setMessage({ type: "error", text: "Por favor, tente logar novamente!" });
+      setTimeout(() => navigate("/login"), 2000);
+    }
+  }
+
   return (
     <>
       {testsWithDisciplines.map((testsWithDisciplines) =>
         testsWithDisciplines.tests
           .filter((test) => testOfCategory(test, categoryId))
           .map((test) => (
-            <Typography key={test.id} color="#878787">
+            <Typography 
+              key={test.id} 
+              color="#878787"
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center"
+              }}
+            >
               <Link
                 href={test.pdfUrl}
                 target="_blank"
                 underline="none"
                 color="inherit"
+                onClick={() => handleTestClick(test.id as number)}
               >{`${test.name} (${testsWithDisciplines.teacherName})`}</Link>
+              <Box
+                component="span"
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "5px"
+                }} 
+              >
+                <VisibilityIcon fontSize="small"/>  
+                {test.views}
+              </Box>
             </Typography>
           ))
       )}
