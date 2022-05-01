@@ -6,6 +6,7 @@ import Alert from "./components/Alert";
 import { MainApp } from "./components/MainApp";
 import { AlertProvider } from "./contexts/AlertContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import ReloadProvider from "./contexts/ReloadContext";
 import Disciplines from "./pages/Disciplines";
 import Instructors from "./pages/Instructors";
 import SignIn from "./pages/SignIn";
@@ -24,19 +25,21 @@ function App() {
       <CssBaseline />
       <AlertProvider>
         <AuthProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<SignUp />} />
-              <Route path="/login" element={<SignIn />} />
-              <Route path="app" element={<MainApp />}>
-                <Route path="/app/disciplinas" element={<Disciplines />} />
-                <Route
-                  path="/app/pessoas-instrutoras"
-                  element={<Instructors />}
-                />
-              </Route>
-            </Routes>
-          </BrowserRouter>
+          <ReloadProvider>  
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<SignUp />} />
+                <Route path="/login" element={<SignIn />} />
+                <Route path="app" element={<MainApp />}>
+                  <Route path="/app/disciplinas" element={<Disciplines />} />
+                  <Route
+                    path="/app/pessoas-instrutoras"
+                    element={<Instructors />}
+                  />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </ReloadProvider>
           <Alert />
         </AuthProvider>
       </AlertProvider>

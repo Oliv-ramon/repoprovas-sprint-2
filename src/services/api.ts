@@ -65,10 +65,12 @@ export interface Category {
 }
 
 export interface Test {
-  id: number;
+  id?: number;
   name: string;
   pdfUrl: string;
+  categoryId: number;
   category: Category;
+  views: number;
 }
 
 export type TestByDiscipline = Term & {
@@ -81,13 +83,13 @@ export type TestByTeacher = TeacherDisciplines & {
   tests: Test[];
 };
 
-interface requestParams {
+interface getParams {
   token: string;
   disciplineName?: string;
   teacherName?: string;
 }
 
-async function getTestsByDiscipline({ token, disciplineName }: requestParams) {
+async function getTestsByDiscipline({ token, disciplineName }: getParams) {
   const params = {
     groupBy: "disciplines",
     disciplineName,
@@ -97,7 +99,7 @@ async function getTestsByDiscipline({ token, disciplineName }: requestParams) {
   return baseAPI.get<{ tests: TestByDiscipline[] }>("/tests", config);
 }
 
-async function getTestsByTeacher({ token, teacherName }: requestParams) {
+async function getTestsByTeacher({ token, teacherName }: getParams) {
   const params = {
     groupBy: "teachers",
     teacherName,
@@ -107,11 +109,16 @@ async function getTestsByTeacher({ token, teacherName }: requestParams) {
   return baseAPI.get<{ tests: TestByTeacher[] }>("/tests", config);
 }
 
-async function getCategories({ token }: requestParams) {
-  const config = {headers: {
-    Authorization: `Bearer ${token}`,
-  }};
+async function getCategories({ token }: getParams) {
+  const config = getConfig({ token });
   return baseAPI.get<{ categories: Category[] }>("/categories", config);
+}
+
+type updateParams = Pick<getParams, "token"> & { testId: number };
+
+async function updateTestViews({ token, testId }: updateParams) {
+  const config = getConfig({ token });
+  return baseAPI.patch(`/tests/${testId}/views`, {}, config);
 }
 
 const api = {
@@ -120,6 +127,7 @@ const api = {
   getTestsByDiscipline,
   getTestsByTeacher,
   getCategories,
+  updateTestViews,
 };
 
 export default api;
