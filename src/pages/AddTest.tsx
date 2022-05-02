@@ -37,7 +37,6 @@ export default function AddTest() {
 
     if (haveEmptyFields) {
       setLoading(false);
-      console.log(formData)
       return setMessage({ 
         type: "error",
         text: "Todos os campos devem ser preenchidos"
@@ -52,8 +51,12 @@ export default function AddTest() {
     
     try {
       await api.createTest({ token, testData });
+      setMessage({
+        type: "success",
+        text: "Teste criado com sucesso!"
+      });
+      navigate("/app/disciplinas");
     } catch (error) {
-      console.log(error)
       setMessage({ 
         type: "error",
         text: "Houve um erro enviar, por favor, tente novamente" 
