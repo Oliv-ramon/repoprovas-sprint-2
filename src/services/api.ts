@@ -114,9 +114,21 @@ async function getCategories({ token }: getParams) {
   return baseAPI.get<{ categories: Category[] }>("/categories", config);
 }
 
-type updateParams = Pick<getParams, "token"> & { testId: number };
+export interface CreateTestData {
+  token: string;
+  testData: 
+    Omit<Test, "category" | "views"> & 
+    { disciplineId: number, teacherId: number };
+}
 
-async function updateTestViews({ token, testId }: updateParams) {
+async function createTest({ token, testData }: CreateTestData) {
+  const config = getConfig({ token });
+  return baseAPI.post(`/tests`, testData, config);
+}
+
+type UpdateParams = Pick<getParams, "token"> & { testId: number };
+
+async function updateTestViews({ token, testId }: UpdateParams) {
   const config = getConfig({ token });
   return baseAPI.patch(`/tests/${testId}/views`, {}, config);
 }
@@ -127,6 +139,7 @@ const api = {
   getTestsByDiscipline,
   getTestsByTeacher,
   getCategories,
+  createTest,
   updateTestViews,
 };
 

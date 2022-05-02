@@ -185,18 +185,18 @@ interface TeacherDisciplineProps {
   categoryId: number;
 }
 
-function doesCategoryHaveTests(teachersDisciplines: TeacherDisciplines[]) {
+export function doesCategoryHaveTests(teachersDisciplines: TeacherDisciplines[]) {
   return (category: Category) =>
     teachersDisciplines.filter((teacherDiscipline) =>
       someTestOfCategory(teacherDiscipline.tests, category.id)
     ).length > 0;
 }
 
-function someTestOfCategory(tests: Test[], categoryId: number) {
+export function someTestOfCategory(tests: Test[], categoryId: number) {
   return tests.some((test) => test.category.id === categoryId);
 }
 
-function testOfCategory(test: Test, categoryId: number) {
+export function testOfCategory(test: Test, categoryId: number) {
   return test.category.id === categoryId;
 }
 

@@ -7,6 +7,7 @@ import { MainApp } from "./components/MainApp";
 import { AlertProvider } from "./contexts/AlertContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import ReloadProvider from "./contexts/ReloadContext";
+import AddTest from "./pages/AddTest";
 import Disciplines from "./pages/Disciplines";
 import Instructors from "./pages/Instructors";
 import SignIn from "./pages/SignIn";
@@ -35,6 +36,10 @@ function App() {
                   <Route
                     path="/app/pessoas-instrutoras"
                     element={<Instructors />}
+                  />
+                  <Route
+                    path="/app/adicionar"
+                    element={<AddTest />}
                   />
                 </Route>
               </Routes>
