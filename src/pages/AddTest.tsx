@@ -67,7 +67,6 @@ export default function AddTest() {
 
   useEffect(() => {
     loadPage({ setTeachersDisciplines, setCategories });
-    console.log(categories)
   }, []);
 
   return (
